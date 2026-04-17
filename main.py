@@ -12,6 +12,8 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Chicken Click Game")
 
 chicken = pygame.image.load("chicken.png")
+powerUp = pygame.image.load("powerUp.png")
+bg = pygame.image.load("bg.png")
 
 """
   Game Modifiers
@@ -22,7 +24,13 @@ extraLives = 0
 # deltatime, to ensure chickens don't fall at 99 mph if FPS is too high!
 deltatime = 0
 clock = pygame.time.Clock() 
-fallSpeed = 100
+fallSpeed = 300 * gravityScale
+
+"""
+  Powerup Setup
+"""
+powerUpPosition = [0, 0] # x, y
+powerUpSpawnTimer = 0 # timer until powerup respawns
 
 iterator = 0
 numofchickens = 5
@@ -56,7 +64,7 @@ while gameover == False:
   
   deltatime = clock.tick(60) / 1000 # 1000ms = 1 second
 
-  fallSpeed = 100 * gravityScale # Replaced any gravity with fallSpeed to make things easier to modify.
+  fallSpeed = 300 * gravityScale # Replaces any gravity with fallSpeed to make things easier to modify.
 
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
@@ -115,14 +123,16 @@ while gameover == False:
 
   if replayscreen == False:
     screen.fill(black)
+    screen.blit(bg, (0,0))
     iterator = 0
     while iterator < numofchickens:
       screen.blit(chicken, (startX[iterator], startY[iterator]))
       iterator += 1
 
     iterator = 0
+    screen.blit(powerUp, (0, 0))
   else:
-    screen.fill((200,0,0))
+    screen.fill((50,120,20))
 
     screen.blit(playagaintext, (pax, 150))
     screen.blit(yestext, (yesx, 450))
