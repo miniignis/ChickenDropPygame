@@ -13,6 +13,17 @@ pygame.display.set_caption("Chicken Click Game")
 
 chicken = pygame.image.load("chicken.png")
 
+"""
+  Game Modifiers
+"""
+gravityScale = 1.0
+extraLives = 0
+
+# deltatime, to ensure chickens don't fall at 99 mph if FPS is too high!
+deltatime = 0
+clock = pygame.time.Clock() 
+fallSpeed = 100
+
 iterator = 0
 numofchickens = 5
 startX = []
@@ -22,7 +33,7 @@ speed = []
 while iterator < numofchickens:
   startX.append(random.randint(0, width - chicken.get_width() + 1))
   startY.append(0 - random.randint(chicken.get_height(), chicken.get_height() * 2))
-  speed.append(0.5)
+  speed.append(fallSpeed)
   iterator += 1
 
 replayscreen = False
@@ -42,6 +53,11 @@ nox = width - width/4 - yestext.get_rect().width/2
 gameover = False
 
 while gameover == False:
+  
+  deltatime = clock.tick(60) / 1000 # 1000ms = 1 second
+
+  fallSpeed = 100 * gravityScale # Replaced any gravity with fallSpeed to make things easier to modify.
+
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       gameover = True
@@ -55,7 +71,7 @@ while gameover == False:
         if coords[0] >= startX[iterator] and coords[0] <= startX[iterator] + chicken.get_width() and coords[1] > startY[iterator] and coords[1] < startY[iterator] + chicken.get_height():
           startX[iterator] =  random.randint(0, width - chicken.get_width() + 1)
           startY[iterator] = 0 - random.randint(chicken.get_height(), chicken.get_height() * 2)
-          speed[iterator] = 0.5
+          speed[iterator] = fallSpeed
           break
         iterator += 1
     else:
@@ -64,12 +80,13 @@ while gameover == False:
         while iterator < numofchickens:
           startX[iterator] =  random.randint(0, width - chicken.get_width() + 1)
           startY[iterator] = 0 - random.randint(chicken.get_height(), chicken.get_height() * 2)
-          speed[iterator] = 0.5
+          speed[iterator] = fallSpeed
           iterator +=1
         replayscreen = False
 
       if coords[0] > nox and coords[0] < nox + notext.get_rect().width and coords[1] > 450 and coords[1] < 450 + notext.get_rect().height:
         gameover = True
+
 
 
   #Updating
@@ -80,10 +97,20 @@ while gameover == False:
       if startY[iterator] + chicken.get_height() > height:
         replayscreen = True
         break
-      startY[iterator] += speed[iterator]
+      startY[iterator] += speed[iterator] * deltatime
       iterator += 1
+  
+  # Extra life!
+  if replayscreen and extraLives > 0:
+    replayscreen = False
+    
+    extraLives -= 1
 
-
+    # Chickens are set back at the top of the screen
+    iterator = 0
+    while iterator < numofchickens:
+      startY[iterator] = 0
+      iterator += 1
   #Drawing
 
   if replayscreen == False:
