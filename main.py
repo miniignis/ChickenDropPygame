@@ -63,8 +63,8 @@ gameover = False
 while gameover == False:
   
   deltatime = clock.tick(60) / 1000 # 1000ms = 1 second
-
   fallSpeed = 300 * gravityScale # Replaces any gravity with fallSpeed to make things easier to modify.
+  powerUpSpawnTimer = powerUpSpawnTimer - 60 * deltatime # Countdown the timer
 
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
@@ -74,6 +74,25 @@ while gameover == False:
   if pygame.mouse.get_pressed()[0]:
     coords = pygame.mouse.get_pos()
     if replayscreen == False:
+
+      if (coords[0] > powerUpPosition[0] and coords[0] < powerUpPosition[0] + powerUp.get_width() and coords[1] > powerUpPosition[1] and coords[1] < powerUpPosition[1] + powerUp.get_height()):
+
+        roll = random.randint(0, 2)
+
+        match roll:
+          case 0: # Respawn the powerup (try again).
+            powerUpSpawnTimer = 0
+          case 1: # Change gravity
+            gravityScale *= random.uniform(0.5, 1.5)
+          case 2: # Gain an extra life
+            extraLives += 1
+          case _: # If it's none of these, do nothing!
+            pass
+
+        powerUpPosition[0] = -9999 # Move x off-screen
+        powerUpPosition[1] = -9999 # Move y off-screen
+
+
       iterator = 0
       while iterator < numofchickens:
         if coords[0] >= startX[iterator] and coords[0] <= startX[iterator] + chicken.get_width() and coords[1] > startY[iterator] and coords[1] < startY[iterator] + chicken.get_height():
@@ -107,6 +126,12 @@ while gameover == False:
         break
       startY[iterator] += speed[iterator] * deltatime
       iterator += 1
+    
+    # Powerup spawn logic
+    if powerUpSpawnTimer <= 0:
+      powerUpSpawnTimer = 360 # Reset the timer
+      powerUpPosition[0] = random.randrange(0, width) # Move x to random on-screen position
+      powerUpPosition[1] = random.randrange(0, height) # Move y to random on-screen position
   
   # Extra life!
   if replayscreen and extraLives > 0:
@@ -130,7 +155,7 @@ while gameover == False:
       iterator += 1
 
     iterator = 0
-    screen.blit(powerUp, (0, 0))
+    screen.blit(powerUp, (powerUpPosition[0], powerUpPosition[1]))
   else:
     screen.fill((50,120,20))
 
